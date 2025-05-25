@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { UpcomingEvents } from '@/types/analytics';
-import { Calendar, Clock, MapPin, AlertTriangle } from 'lucide-react';
+import { Calendar, Clock, MapPin, AlertTriangle, ArrowRight } from 'lucide-react';
 
 interface UpcomingReservationsProps {
   data: UpcomingEvents | null;
@@ -12,11 +12,11 @@ export default function UpcomingReservations({ data, isLoading }: UpcomingReserv
   
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-1/4 mb-6"></div>
+      <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 p-6 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm animate-pulse">
+        <div className="h-6 bg-gray-700/50 rounded w-1/4 mb-6"></div>
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-20 bg-gray-200 rounded w-full"></div>
+            <div key={i} className="h-20 bg-gray-700/50 rounded w-full"></div>
           ))}
         </div>
       </div>
@@ -25,9 +25,9 @@ export default function UpcomingReservations({ data, isLoading }: UpcomingReserv
 
   if (!data) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Upcoming Events</h2>
-        <div className="flex items-center justify-center h-32 text-gray-500">
+      <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 p-6 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm">
+        <h2 className="text-lg font-semibold mb-4 font-serif text-white">Upcoming Events</h2>
+        <div className="flex items-center justify-center h-32 text-gray-400">
           No data available
         </div>
       </div>
@@ -55,16 +55,16 @@ export default function UpcomingReservations({ data, isLoading }: UpcomingReserv
     data.overdue_returns.length;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
+    <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 p-6 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Upcoming Events</h2>
-        <span className="text-sm text-gray-500">
+        <h2 className="text-lg font-semibold font-serif text-white">Upcoming Events</h2>
+        <span className="text-sm text-gray-300">
           Next {data.upcoming_pickups.length + data.upcoming_returns.length} events
         </span>
       </div>
 
       {totalCount === 0 ? (
-        <div className="flex items-center justify-center h-32 text-gray-500">
+        <div className="flex items-center justify-center h-32 text-gray-400">
           No upcoming events
         </div>
       ) : (
@@ -72,7 +72,7 @@ export default function UpcomingReservations({ data, isLoading }: UpcomingReserv
           {/* Overdue section */}
           {data.overdue_returns.length > 0 && (
             <div className="mb-3">
-              <div className="flex items-center text-red-600 mb-2">
+              <div className="flex items-center text-red-400 mb-2">
                 <AlertTriangle size={16} className="mr-1" />
                 <h3 className="text-sm font-semibold">Overdue Returns</h3>
               </div>
@@ -81,16 +81,16 @@ export default function UpcomingReservations({ data, isLoading }: UpcomingReserv
                   <div 
                     key={item.reservation_id}
                     onClick={() => handleItemClick(item.reservation_id)}
-                    className="border border-red-200 bg-red-50 rounded-md p-3 cursor-pointer hover:bg-red-100"
+                    className="border border-red-900/30 bg-red-900/20 rounded-md p-3 cursor-pointer hover:bg-red-900/30 transition-colors"
                   >
                     <div className="flex justify-between">
                       <div>
-                        <p className="font-medium">{item.client_name}</p>
-                        <p className="text-sm text-gray-600">{item.car_info}</p>
+                        <p className="font-medium text-white">{item.client_name}</p>
+                        <p className="text-sm text-gray-400">{item.car_info}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-red-600 font-medium">{item.days_overdue} days overdue</p>
-                        <p className="text-xs text-gray-500 flex items-center justify-end">
+                        <p className="text-sm text-red-400 font-medium">{item.days_overdue} days overdue</p>
+                        <p className="text-xs text-gray-400 flex items-center justify-end">
                           <Clock size={12} className="mr-1" />
                           {formatDate(item.end_date)}
                         </p>
@@ -105,7 +105,7 @@ export default function UpcomingReservations({ data, isLoading }: UpcomingReserv
           {/* Upcoming returns */}
           {data.upcoming_returns.length > 0 && (
             <div className="mb-3">
-              <div className="flex items-center text-blue-600 mb-2">
+              <div className="flex items-center text-blue-400 mb-2">
                 <Calendar size={16} className="mr-1" />
                 <h3 className="text-sm font-semibold">Upcoming Returns</h3>
               </div>
@@ -114,20 +114,20 @@ export default function UpcomingReservations({ data, isLoading }: UpcomingReserv
                   <div 
                     key={item.reservation_id}
                     onClick={() => handleItemClick(item.reservation_id)}
-                    className="border rounded-md p-3 cursor-pointer hover:bg-gray-50"
+                    className="border border-gray-700 bg-gray-800/50 rounded-md p-3 cursor-pointer hover:border-blue-500/30 hover:bg-blue-900/20 transition-colors"
                   >
                     <div className="flex justify-between">
                       <div>
-                        <p className="font-medium">{item.client_name}</p>
-                        <p className="text-sm text-gray-600">{item.car_info}</p>
+                        <p className="font-medium text-white">{item.client_name}</p>
+                        <p className="text-sm text-gray-400">{item.car_info}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-gray-500 flex items-center justify-end">
-                          <Clock size={12} className="mr-1" />
+                        <p className="text-xs text-gray-400 flex items-center justify-end">
+                          <Clock size={12} className="mr-1 text-blue-400" />
                           {formatDate(item.end_date)}
                         </p>
-                        <p className="text-xs text-gray-500 flex items-center justify-end">
-                          <MapPin size={12} className="mr-1" />
+                        <p className="text-xs text-gray-400 flex items-center justify-end">
+                          <MapPin size={12} className="mr-1 text-blue-400" />
                           {item.return_location}
                         </p>
                       </div>
@@ -141,7 +141,7 @@ export default function UpcomingReservations({ data, isLoading }: UpcomingReserv
           {/* Upcoming pickups */}
           {data.upcoming_pickups.length > 0 && (
             <div>
-              <div className="flex items-center text-green-600 mb-2">
+              <div className="flex items-center text-green-400 mb-2">
                 <Calendar size={16} className="mr-1" />
                 <h3 className="text-sm font-semibold">Upcoming Pickups</h3>
               </div>
@@ -150,20 +150,20 @@ export default function UpcomingReservations({ data, isLoading }: UpcomingReserv
                   <div 
                     key={item.reservation_id}
                     onClick={() => handleItemClick(item.reservation_id)}
-                    className="border rounded-md p-3 cursor-pointer hover:bg-gray-50"
+                    className="border border-gray-700 bg-gray-800/50 rounded-md p-3 cursor-pointer hover:border-green-500/30 hover:bg-green-900/20 transition-colors"
                   >
                     <div className="flex justify-between">
                       <div>
-                        <p className="font-medium">{item.client_name}</p>
-                        <p className="text-sm text-gray-600">{item.car_info}</p>
+                        <p className="font-medium text-white">{item.client_name}</p>
+                        <p className="text-sm text-gray-400">{item.car_info}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-gray-500 flex items-center justify-end">
-                          <Clock size={12} className="mr-1" />
+                        <p className="text-xs text-gray-400 flex items-center justify-end">
+                          <Clock size={12} className="mr-1 text-green-400" />
                           {formatDate(item.start_date)}
                         </p>
-                        <p className="text-xs text-gray-500 flex items-center justify-end">
-                          <MapPin size={12} className="mr-1" />
+                        <p className="text-xs text-gray-400 flex items-center justify-end">
+                          <MapPin size={12} className="mr-1 text-green-400" />
                           {item.pickup_location}
                         </p>
                       </div>
@@ -180,9 +180,9 @@ export default function UpcomingReservations({ data, isLoading }: UpcomingReserv
         <div className="mt-4 text-center">
           <button
             onClick={() => router.push('/dashboard/reports/upcoming')}
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-sm text-gold hover:text-white flex items-center justify-center mx-auto transition-colors"
           >
-            View all upcoming events
+            View all upcoming events <ArrowRight size={14} className="ml-1" />
           </button>
         </div>
       )}

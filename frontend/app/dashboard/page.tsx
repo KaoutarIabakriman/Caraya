@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useAuth } from '@/lib/auth-provider';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Car, Users, LogOut, User } from 'lucide-react';
+import { Car, Users, Calendar, FileText, Loader2 } from 'lucide-react';
 import { 
   DashboardMetrics, 
   ReservationAnalytics,
@@ -18,11 +18,11 @@ import RevenueChart from '@/components/dashboard/RevenueChart';
 import ReservationStatsChart from '@/components/dashboard/ReservationStatsChart';
 import CarUtilizationChart from '@/components/dashboard/CarUtilizationChart';
 import UpcomingReservations from '@/components/dashboard/UpcomingReservations';
+import { motion } from 'framer-motion';
 
 export default function DashboardPage() {
-  const { user, token, logout, isAuthenticated, isLoading } = useAuth();
+  const { user, token, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [reservationStats, setReservationStats] = useState<ReservationAnalytics | null>(null);
@@ -35,6 +35,24 @@ export default function DashboardPage() {
   const [isLoadingFinancial, setIsLoadingFinancial] = useState(true);
   const [isLoadingUtilization, setIsLoadingUtilization] = useState(true);
   const [isLoadingUpcoming, setIsLoadingUpcoming] = useState(true);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        when: "beforeChildren",
+        staggerChildren: 0.1,
+        duration: 0.3 
+      } 
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4 } }
+  };
 
   useEffect(() => {
     // Redirect if not authenticated
@@ -136,76 +154,102 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <Loader2 className="h-12 w-12 animate-spin text-gold" />
       </div>
     );
   }
 
-  const handleLogout = () => {
-    setLoading(true);
-    logout();
-    router.push('/login');
-  };
-
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Manager Dashboard</h1>
-        <button
-          onClick={handleLogout}
-          disabled={loading}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md"
-        >
-          <LogOut size={18} />
-          <span>{loading ? 'Logging out...' : 'Logout'}</span>
-        </button>
-      </div>
+    <motion.div 
+      className="container mx-auto px-4 py-8 space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={itemVariants}>
+        <h1 className="text-3xl font-bold font-serif mb-2 flex items-center">
+          <span className="text-gold">Manager</span> Dashboard
+        </h1>
+        <div className="h-1 w-24 bg-gradient-to-r from-gold to-gold/50 mb-8"></div>
+      </motion.div>
 
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <h2 className="text-xl font-bold mb-4">Welcome, {user?.name}!</h2>
-        <p className="text-gray-600">
+      <motion.div variants={itemVariants} className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm p-6 mb-8">
+        <h2 className="text-xl font-bold mb-4 font-serif">Welcome, {user?.name}!</h2>
+        <p className="text-gray-300">
           You are logged in as a manager. Use the options below to manage your resources.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link href="/dashboard/cars" className="block">
-          <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm p-6 hover:border-gold/50 transition-all duration-300 group">
             <div className="flex items-center mb-4">
-              <div className="bg-blue-100 p-3 rounded-full mr-4">
-                <Car className="text-blue-600" size={24} />
+              <div className="bg-blue-900/30 p-3 rounded-full mr-4 border border-blue-500/30 group-hover:border-gold/30 transition-colors">
+                <Car className="text-blue-400 group-hover:text-gold transition-colors" size={24} />
               </div>
-              <h3 className="text-lg font-bold">Car Management</h3>
+              <h3 className="text-lg font-bold font-serif">Car Management</h3>
             </div>
-            <p className="text-gray-600">
+            <p className="text-gray-300">
               View, add, edit, and manage your car inventory. Track car details, availability, and rental history.
             </p>
           </div>
         </Link>
 
         <Link href="/dashboard/clients" className="block">
-          <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm p-6 hover:border-gold/50 transition-all duration-300 group">
             <div className="flex items-center mb-4">
-              <div className="bg-green-100 p-3 rounded-full mr-4">
-                <User className="text-green-600" size={24} />
+              <div className="bg-purple-900/30 p-3 rounded-full mr-4 border border-purple-500/30 group-hover:border-gold/30 transition-colors">
+                <Users className="text-purple-400 group-hover:text-gold transition-colors" size={24} />
               </div>
-              <h3 className="text-lg font-bold">Client Management</h3>
+              <h3 className="text-lg font-bold font-serif">Client Management</h3>
             </div>
-            <p className="text-gray-600">
+            <p className="text-gray-300">
               Manage client information, view rental history, and track client details for easy access during rentals.
             </p>
           </div>
         </Link>
-      </div>
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link href="/dashboard/reservations" className="block">
+          <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm p-6 hover:border-gold/50 transition-all duration-300 group">
+            <div className="flex items-center mb-4">
+              <div className="bg-green-900/30 p-3 rounded-full mr-4 border border-green-500/30 group-hover:border-gold/30 transition-colors">
+                <Calendar className="text-green-400 group-hover:text-gold transition-colors" size={24} />
+              </div>
+              <h3 className="text-lg font-bold font-serif">Reservation Management</h3>
+            </div>
+            <p className="text-gray-300">
+              Create, view, and manage reservations. Track rental periods, payments, and reservation status.
+            </p>
+          </div>
+        </Link>
+
+        <Link href="/dashboard/reports" className="block">
+          <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm p-6 hover:border-gold/50 transition-all duration-300 group">
+            <div className="flex items-center mb-4">
+              <div className="bg-amber-900/30 p-3 rounded-full mr-4 border border-amber-500/30 group-hover:border-gold/30 transition-colors">
+                <FileText className="text-amber-400 group-hover:text-gold transition-colors" size={24} />
+              </div>
+              <h3 className="text-lg font-bold font-serif">Reports & Analytics</h3>
+            </div>
+            <p className="text-gray-300">
+              View financial reports, utilization metrics, and business analytics to make informed decisions.
+            </p>
+          </div>
+        </Link>
+      </motion.div>
 
       {/* Metrics Cards */}
-      <DashboardMetricsCards 
-        metrics={dashboardMetrics as DashboardMetrics} 
-        isLoading={isLoadingMetrics} 
-      />
+      <motion.div variants={itemVariants}>
+        <DashboardMetricsCards 
+          metrics={dashboardMetrics as DashboardMetrics} 
+          isLoading={isLoadingMetrics} 
+        />
+      </motion.div>
       
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RevenueChart 
           financialData={financialData} 
           isLoading={isLoadingFinancial} 
@@ -215,10 +259,10 @@ export default function DashboardPage() {
           data={reservationStats} 
           isLoading={isLoadingReservationStats} 
         />
-      </div>
+      </motion.div>
       
       {/* Car Utilization and Upcoming Events */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CarUtilizationChart 
           data={carUtilization} 
           isLoading={isLoadingUtilization} 
@@ -228,7 +272,7 @@ export default function DashboardPage() {
           data={upcomingEvents} 
           isLoading={isLoadingUpcoming} 
         />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 } 
