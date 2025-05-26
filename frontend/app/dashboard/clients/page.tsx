@@ -5,7 +5,8 @@ import axios from 'axios';
 import { useAuth } from '@/lib/auth-provider';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { PlusCircle, Edit, Trash2, Eye, User, AlertCircle, Search } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Eye, User, AlertCircle, Search, Loader2, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 // Define client type
 type Client = {
@@ -31,6 +32,24 @@ export default function ClientsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalClients, setTotalClients] = useState(0);
   const perPage = 10;
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        when: "beforeChildren",
+        staggerChildren: 0.1,
+        duration: 0.3 
+      } 
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4 } }
+  };
 
   useEffect(() => {
     // Redirect if not authenticated
@@ -98,35 +117,55 @@ export default function ClientsPage() {
   if (isLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <Loader2 className="h-12 w-12 animate-spin text-gold" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Client Management</h1>
+    <motion.div 
+      className="container mx-auto px-4 py-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div 
+        className="flex justify-between items-center mb-8"
+        variants={itemVariants}
+      >
+        <div>
+          <h1 className="text-3xl font-bold font-serif mb-2 flex items-center">
+            <Users className="mr-3 text-gold" size={28} />
+            <span className="text-white">Client <span className="text-gold">Management</span></span>
+          </h1>
+          <div className="h-1 w-24 bg-gradient-to-r from-gold to-gold/50"></div>
+        </div>
         <Link 
           href="/dashboard/clients/add" 
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+          className="flex items-center gap-2 bg-gradient-to-r from-gold to-amber-500 hover:from-gold hover:to-amber-400 text-black px-4 py-2 rounded-md transition-all duration-300 font-medium"
         >
           <PlusCircle size={18} />
           <span>Add New Client</span>
         </Link>
-      </div>
+      </motion.div>
       
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+        <motion.div 
+          variants={itemVariants}
+          className="bg-red-900/20 border-l-4 border-red-500 text-red-400 p-4 mb-6 rounded-r-md"
+        >
           <div className="flex items-center">
             <AlertCircle className="mr-2" />
             <p>{error}</p>
           </div>
-        </div>
+        </motion.div>
       )}
       
       {/* Search Bar */}
-      <div className="mb-6">
+      <motion.div 
+        className="mb-6"
+        variants={itemVariants}
+      >
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <div className="relative flex-grow">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -137,73 +176,79 @@ export default function ClientsPage() {
               placeholder="Search by name, email or phone..."
               value={search}
               onChange={handleSearchChange}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full pl-10 pr-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-4 py-2 bg-gray-800 text-gold border border-gold/30 rounded-md hover:bg-gold/10 transition-colors"
           >
             Search
           </button>
         </form>
-      </div>
+      </motion.div>
       
       {clients.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-lg">
-          <User className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-lg font-medium text-gray-900">No clients found</h3>
-          <p className="mt-1 text-gray-500">Get started by adding a new client.</p>
+        <motion.div 
+          variants={itemVariants}
+          className="text-center py-16 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm"
+        >
+          <User className="mx-auto h-16 w-16 text-gold/60" />
+          <h3 className="mt-4 text-xl font-medium text-white font-serif">No clients found</h3>
+          <p className="mt-2 text-gray-400">Get started by adding a new client.</p>
           <div className="mt-6">
             <Link 
               href="/dashboard/clients/add" 
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="inline-flex items-center px-5 py-2.5 border border-gold/30 shadow-lg text-sm font-medium rounded-md text-gold hover:text-black hover:bg-gold transition-colors duration-300"
             >
-              <PlusCircle className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+              <PlusCircle className="mr-2 h-5 w-5" aria-hidden="true" />
               Add New Client
             </Link>
           </div>
-        </div>
+        </motion.div>
       ) : (
         <>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white rounded-lg overflow-hidden shadow-lg">
-              <thead className="bg-gray-100 text-gray-700">
+          <motion.div 
+            variants={itemVariants}
+            className="overflow-x-auto"
+          >
+            <table className="min-w-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg overflow-hidden shadow-lg border border-white/10">
+              <thead className="bg-gray-900/50 text-gray-300 border-b border-white/10">
                 <tr>
-                  <th className="py-3 px-4 text-left">Name</th>
-                  <th className="py-3 px-4 text-left">Email</th>
-                  <th className="py-3 px-4 text-left">Phone</th>
-                  <th className="py-3 px-4 text-left">Driver License</th>
-                  <th className="py-3 px-4 text-center">Actions</th>
+                  <th className="py-4 px-4 text-left font-medium">Name</th>
+                  <th className="py-4 px-4 text-left font-medium">Email</th>
+                  <th className="py-4 px-4 text-left font-medium">Phone</th>
+                  <th className="py-4 px-4 text-left font-medium">Driver License</th>
+                  <th className="py-4 px-4 text-center font-medium">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-white/5">
                 {clients.map((client) => (
-                  <tr key={client._id} className="hover:bg-gray-50">
+                  <tr key={client._id} className="hover:bg-white/5 transition-colors">
                     <td className="py-4 px-4">
-                      <div className="font-medium text-gray-900">{client.full_name}</div>
+                      <div className="font-medium text-white">{client.full_name}</div>
                     </td>
-                    <td className="py-4 px-4">{client.email}</td>
-                    <td className="py-4 px-4">{client.phone}</td>
-                    <td className="py-4 px-4">{client.driver_license || 'N/A'}</td>
+                    <td className="py-4 px-4 text-gray-300">{client.email}</td>
+                    <td className="py-4 px-4 text-gray-300">{client.phone}</td>
+                    <td className="py-4 px-4 text-gray-300">{client.driver_license || 'N/A'}</td>
                     <td className="py-4 px-4">
                       <div className="flex justify-center space-x-2">
                         <Link href={`/dashboard/clients/${client._id}`}>
-                          <button className="p-1 rounded-full hover:bg-gray-200" title="View Details">
-                            <Eye size={18} className="text-blue-600" />
+                          <button className="p-2 rounded-full hover:bg-white/10 transition-colors" title="View Details">
+                            <Eye size={18} className="text-blue-400 hover:text-blue-300" />
                           </button>
                         </Link>
                         <Link href={`/dashboard/clients/edit/${client._id}`}>
-                          <button className="p-1 rounded-full hover:bg-gray-200" title="Edit Client">
-                            <Edit size={18} className="text-green-600" />
+                          <button className="p-2 rounded-full hover:bg-white/10 transition-colors" title="Edit Client">
+                            <Edit size={18} className="text-green-400 hover:text-green-300" />
                           </button>
                         </Link>
                         <button 
-                          className="p-1 rounded-full hover:bg-gray-200" 
+                          className="p-2 rounded-full hover:bg-white/10 transition-colors" 
                           title="Delete Client"
                           onClick={() => handleDelete(client._id)}
                         >
-                          <Trash2 size={18} className="text-red-600" />
+                          <Trash2 size={18} className="text-red-400 hover:text-red-300" />
                         </button>
                       </div>
                     </td>
@@ -211,36 +256,39 @@ export default function ClientsPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </motion.div>
           
           {/* Pagination */}
-          <div className="mt-6 flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              Showing <span className="font-medium">{clients.length}</span> of{' '}
-              <span className="font-medium">{totalClients}</span> clients
+          <motion.div 
+            variants={itemVariants}
+            className="mt-6 flex items-center justify-between"
+          >
+            <div className="text-sm text-gray-300">
+              Showing <span className="font-medium text-gold">{clients.length}</span> of{' '}
+              <span className="font-medium text-gold">{totalClients}</span> clients
             </div>
             <div className="flex space-x-2">
               <button
                 onClick={() => setPage(Math.max(1, page - 1))}
                 disabled={page === 1}
-                className="px-3 py-1 border rounded-md disabled:opacity-50"
+                className="px-3 py-1 border border-white/10 rounded-md disabled:opacity-50 text-gray-300 hover:bg-white/5 transition-colors"
               >
                 Previous
               </button>
-              <span className="px-3 py-1 border rounded-md bg-gray-100">
+              <span className="px-3 py-1 border border-white/10 rounded-md bg-gray-800/50 text-gold">
                 {page} of {totalPages}
               </span>
               <button
                 onClick={() => setPage(Math.min(totalPages, page + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-1 border rounded-md disabled:opacity-50"
+                className="px-3 py-1 border border-white/10 rounded-md disabled:opacity-50 text-gray-300 hover:bg-white/5 transition-colors"
               >
                 Next
               </button>
             </div>
-          </div>
+          </motion.div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 } 

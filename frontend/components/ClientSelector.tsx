@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '@/lib/auth-provider';
 import { Search, User, Loader2 } from 'lucide-react';
 import { Client } from '@/types/client';
+import { motion } from 'framer-motion';
 
 interface ClientSelectorProps {
   onClientSelect: (client: Client) => void;
@@ -19,6 +20,12 @@ export default function ClientSelector({ onClientSelect, selectedClientId, class
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Animation variants
+  const dropdownVariants = {
+    hidden: { opacity: 0, y: -5 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.2 } }
+  };
 
   // Fetch clients on component mount
   useEffect(() => {
@@ -82,30 +89,30 @@ export default function ClientSelector({ onClientSelect, selectedClientId, class
 
   return (
     <div className={`relative ${className}`}>
-      <label htmlFor="client-selector" className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor="client-selector" className="block text-sm font-medium text-gray-300 mb-1">
         Client
       </label>
       
       {/* Selected client display or search input */}
       <div 
-        className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer"
+        className="flex items-center justify-between w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md cursor-pointer focus:ring-1 focus:ring-gold focus:border-gold"
         onClick={() => setIsOpen(!isOpen)}
       >
         {selectedClient ? (
           <div className="flex items-center">
-            <User size={18} className="text-gray-500 mr-2" />
+            <User size={18} className="text-gold mr-2" />
             <div>
               <div className="font-medium">{selectedClient.full_name}</div>
-              <div className="text-sm text-gray-500">{selectedClient.email}</div>
+              <div className="text-sm text-gray-400">{selectedClient.email}</div>
             </div>
           </div>
         ) : (
           <div className="flex items-center w-full">
-            <Search size={18} className="text-gray-500 mr-2" />
+            <Search size={18} className="text-gold mr-2" />
             <input
               type="text"
               placeholder="Search clients..."
-              className="w-full outline-none"
+              className="w-full outline-none bg-transparent text-white placeholder-gray-500"
               value={searchTerm}
               onChange={(e) => {
                 e.stopPropagation();
@@ -119,7 +126,7 @@ export default function ClientSelector({ onClientSelect, selectedClientId, class
         
         {selectedClient && (
           <button 
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-white"
             onClick={(e) => {
               e.stopPropagation();
               setSelectedClient(null);
@@ -133,26 +140,31 @@ export default function ClientSelector({ onClientSelect, selectedClientId, class
       
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+        <motion.div 
+          className="absolute z-10 w-full mt-1 bg-gray-800/90 border border-white/10 rounded-md shadow-lg max-h-60 overflow-y-auto backdrop-blur-sm"
+          variants={dropdownVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {isLoading ? (
             <div className="flex items-center justify-center p-4">
-              <Loader2 size={20} className="animate-spin text-blue-500 mr-2" />
-              <span>Loading clients...</span>
+              <Loader2 size={20} className="animate-spin text-gold mr-2" />
+              <span className="text-gray-300">Loading clients...</span>
             </div>
           ) : error ? (
-            <div className="p-4 text-red-500">{error}</div>
+            <div className="p-4 text-red-400">{error}</div>
           ) : filteredClients.length === 0 ? (
-            <div className="p-4 text-gray-500">No clients found</div>
+            <div className="p-4 text-gray-400">No clients found</div>
           ) : (
-            <ul>
+            <ul className="divide-y divide-white/5">
               {filteredClients.map((client) => (
                 <li 
                   key={client._id}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-3 hover:bg-white/5 cursor-pointer transition-colors"
                   onClick={() => handleClientSelect(client)}
                 >
-                  <div className="font-medium">{client.full_name}</div>
-                  <div className="text-sm text-gray-500 flex justify-between">
+                  <div className="font-medium text-white">{client.full_name}</div>
+                  <div className="text-sm text-gray-400 flex justify-between">
                     <span>{client.email}</span>
                     <span>{client.phone}</span>
                   </div>
@@ -160,7 +172,7 @@ export default function ClientSelector({ onClientSelect, selectedClientId, class
               ))}
             </ul>
           )}
-        </div>
+        </motion.div>
       )}
     </div>
   );

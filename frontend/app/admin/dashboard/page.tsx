@@ -288,8 +288,8 @@ export default function AdminDashboardPage() {
 
                   {/* Active Reservations */}
                   <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 overflow-hidden rounded-lg border border-white/10 shadow-lg backdrop-blur-sm">
-                    <div className="p-5">
-                      <div className="flex items-center">
+                <div className="p-5">
+                  <div className="flex items-center">
                         <div className="flex-shrink-0 bg-green-500/20 rounded-md p-3 border border-green-500/30">
                           <Calendar className="h-6 w-6 text-green-400" />
                         </div>
@@ -314,17 +314,17 @@ export default function AdminDashboardPage() {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 bg-gold/20 rounded-md p-3 border border-gold/30">
                           <DollarSign className="h-6 w-6 text-gold" />
-                        </div>
-                        <div className="ml-5 w-0 flex-1">
-                          <dl>
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
                             <dt className="text-sm font-medium text-gray-400 truncate">Total Revenue</dt>
                             <dd className="flex items-baseline">
                               <div className="text-2xl font-semibold text-white">{formatCurrency(stats?.total_revenue || 0)}</div>
                               <div className="ml-2 text-sm text-green-400 flex items-center">
                                 <TrendingUp size={14} className="mr-1" /> 30 days
                               </div>
-                            </dd>
-                          </dl>
+                        </dd>
+                      </dl>
                         </div>
                       </div>
                     </div>
@@ -425,27 +425,27 @@ export default function AdminDashboardPage() {
                         </tbody>
                       </table>
                     </div>
-                  </div>
                 </div>
+              </div>
 
-                {/* Quick Actions */}
+              {/* Quick Actions */}
                 <div>
                   <h2 className="text-xl font-bold mb-4 font-serif flex items-center">
                     <Settings className="mr-2 text-gold" /> Quick Actions
                   </h2>
                   <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 overflow-hidden rounded-lg border border-white/10 shadow-lg backdrop-blur-sm">
-                    <div className="p-5">
+                <div className="p-5">
                       <ul className="divide-y divide-white/10">
-                        <li className="py-3">
+                      <li className="py-3">
                           <Link 
                             href="/admin/managers" 
                             className="text-gray-200 hover:text-gold flex items-center transition-colors"
                           >
                             <Plus size={16} className="mr-2" />
-                            Add New Manager
-                          </Link>
-                        </li>
-                        <li className="py-3">
+                          Add New Manager
+                        </Link>
+                      </li>
+                      <li className="py-3">
                           <Link 
                             href="#" 
                             className="text-gray-200 hover:text-gold flex items-center transition-colors"
@@ -461,12 +461,12 @@ export default function AdminDashboardPage() {
                           >
                             <User size={16} className="mr-2" />
                             Update Profile
-                          </Link>
-                        </li>
-                      </ul>
-                    </div>
+                        </Link>
+                      </li>
+                    </ul>
                   </div>
                 </div>
+              </div>
               </motion.div>
             </motion.div>
           )}

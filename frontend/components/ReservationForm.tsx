@@ -9,6 +9,7 @@ import ClientSelector from './ClientSelector';
 import CarSelector from './CarSelector';
 import DateRangePicker from './DateRangePicker';
 import { Loader2, Save, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface ReservationFormProps {
   reservation?: Reservation;
@@ -43,6 +44,12 @@ export default function ReservationForm({ reservation, isEdit = false }: Reserva
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Animation variants
+  const formItemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+  };
   
   // Initialize form data if editing an existing reservation
   useEffect(() => {
@@ -213,7 +220,12 @@ export default function ReservationForm({ reservation, isEdit = false }: Reserva
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Client and Car Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        variants={formItemVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <ClientSelector
           onClientSelect={handleClientSelect}
           selectedClientId={formData.client_id}
@@ -226,40 +238,56 @@ export default function ReservationForm({ reservation, isEdit = false }: Reserva
           endDate={formData.end_date}
           reservationId={isEdit ? reservation?._id : undefined}
         />
-      </div>
+      </motion.div>
       
       {/* Date Range Selection */}
-      <DateRangePicker
-        startDate={formData.start_date}
-        endDate={formData.end_date}
-        onDateChange={handleDateChange}
-      />
+      <motion.div
+        variants={formItemVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <DateRangePicker
+          startDate={formData.start_date}
+          endDate={formData.end_date}
+          onDateChange={handleDateChange}
+        />
+      </motion.div>
       
       {/* Pricing Information */}
       {pricing && (
-        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Pricing</h3>
+        <motion.div 
+          className="bg-gray-900/50 p-4 rounded-md border border-white/10 backdrop-blur-sm"
+          variants={formItemVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <h3 className="text-lg font-medium text-white mb-2 font-serif">Pricing</h3>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <p className="text-sm text-gray-500">Daily Rate</p>
-              <p className="font-medium">${pricing.daily_rate.toFixed(2)}</p>
+              <p className="text-sm text-gray-400">Daily Rate</p>
+              <p className="font-medium text-white">${pricing.daily_rate.toFixed(2)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Days</p>
-              <p className="font-medium">{pricing.total_days}</p>
+              <p className="text-sm text-gray-400">Total Days</p>
+              <p className="font-medium text-white">{pricing.total_days}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Amount</p>
-              <p className="font-medium text-lg text-blue-600">${pricing.total_amount.toFixed(2)}</p>
+              <p className="text-sm text-gray-400">Total Amount</p>
+              <p className="font-medium text-lg text-gold">${pricing.total_amount.toFixed(2)}</p>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
       
       {/* Location Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        variants={formItemVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-300 mb-1">
             Pickup Location
           </label>
           <input
@@ -267,13 +295,13 @@ export default function ReservationForm({ reservation, isEdit = false }: Reserva
             name="pickup_location"
             value={formData.pickup_location}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold placeholder-gray-500"
             placeholder="Enter pickup location"
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-300 mb-1">
             Return Location
           </label>
           <input
@@ -281,16 +309,21 @@ export default function ReservationForm({ reservation, isEdit = false }: Reserva
             name="return_location"
             value={formData.return_location}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold placeholder-gray-500"
             placeholder="Enter return location"
           />
         </div>
-      </div>
+      </motion.div>
       
       {/* Payment Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        variants={formItemVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-300 mb-1">
             Deposit Amount
           </label>
           <input
@@ -298,7 +331,7 @@ export default function ReservationForm({ reservation, isEdit = false }: Reserva
             name="deposit_amount"
             value={formData.deposit_amount || ''}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold placeholder-gray-500"
             placeholder="Enter deposit amount"
             min="0"
             step="0.01"
@@ -306,32 +339,36 @@ export default function ReservationForm({ reservation, isEdit = false }: Reserva
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-300 mb-1">
             Payment Status
           </label>
           <select
             name="payment_status"
             value={formData.payment_status}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold appearance-none"
           >
             <option value="unpaid">Unpaid</option>
             <option value="partial">Partially Paid</option>
             <option value="paid">Fully Paid</option>
           </select>
         </div>
-      </div>
+      </motion.div>
       
       {/* Reservation Status */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+      <motion.div
+        variants={formItemVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <label className="block text-sm font-medium text-gray-300 mb-1">
           Reservation Status
         </label>
         <select
           name="status"
           value={formData.status}
           onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold appearance-none"
         >
           <option value="pending">Pending</option>
           <option value="confirmed">Confirmed</option>
@@ -339,11 +376,15 @@ export default function ReservationForm({ reservation, isEdit = false }: Reserva
           <option value="completed">Completed</option>
           <option value="cancelled">Cancelled</option>
         </select>
-      </div>
+      </motion.div>
       
       {/* Notes */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+      <motion.div
+        variants={formItemVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <label className="block text-sm font-medium text-gray-300 mb-1">
           Notes
         </label>
         <textarea
@@ -351,31 +392,46 @@ export default function ReservationForm({ reservation, isEdit = false }: Reserva
           value={formData.notes}
           onChange={handleInputChange}
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold placeholder-gray-500"
           placeholder="Add any additional notes here"
         ></textarea>
-      </div>
+      </motion.div>
       
       {/* Error and Success Messages */}
       {error && (
-        <div className="bg-red-50 p-4 rounded-md flex items-start">
-          <AlertCircle className="text-red-500 mr-2 flex-shrink-0" size={20} />
-          <p className="text-red-700">{error}</p>
-        </div>
+        <motion.div 
+          className="bg-red-900/20 p-4 rounded-md border border-red-500/30 flex items-start"
+          variants={formItemVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <AlertCircle className="text-red-400 mr-2 flex-shrink-0" size={20} />
+          <p className="text-red-400">{error}</p>
+        </motion.div>
       )}
       
       {success && (
-        <div className="bg-green-50 p-4 rounded-md">
-          <p className="text-green-700">{success}</p>
-        </div>
+        <motion.div 
+          className="bg-green-900/20 p-4 rounded-md border border-green-500/30"
+          variants={formItemVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <p className="text-green-400">{success}</p>
+        </motion.div>
       )}
       
       {/* Submit Button */}
-      <div className="flex justify-end">
+      <motion.div 
+        className="flex justify-end"
+        variants={formItemVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <button
           type="submit"
           disabled={isLoading}
-          className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300 flex items-center"
+          className="px-6 py-2 bg-gradient-to-r from-gold to-amber-500 hover:from-gold hover:to-amber-400 text-black rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gold/50 disabled:opacity-50 flex items-center font-medium"
         >
           {isLoading ? (
             <>
@@ -389,7 +445,7 @@ export default function ReservationForm({ reservation, isEdit = false }: Reserva
             </>
           )}
         </button>
-      </div>
+      </motion.div>
     </form>
   );
 } 

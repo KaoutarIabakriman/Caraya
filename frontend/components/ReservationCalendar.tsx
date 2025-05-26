@@ -3,7 +3,8 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAuth } from '@/lib/auth-provider';
 import { CalendarEvent, ReservationStatus } from '@/types/reservation';
-import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface ReservationCalendarProps {
   onEventClick?: (eventId: string) => void;
@@ -11,11 +12,11 @@ interface ReservationCalendarProps {
 
 // Status color mapping
 const statusColors: Record<ReservationStatus, string> = {
-  pending: 'bg-yellow-100 border-yellow-400 text-yellow-800',
-  confirmed: 'bg-blue-100 border-blue-400 text-blue-800',
-  active: 'bg-green-100 border-green-400 text-green-800',
-  completed: 'bg-gray-100 border-gray-400 text-gray-800',
-  cancelled: 'bg-red-100 border-red-400 text-red-800'
+  pending: 'bg-yellow-900/30 border-yellow-500/30 text-yellow-400',
+  confirmed: 'bg-blue-900/30 border-blue-500/30 text-blue-400',
+  active: 'bg-green-900/30 border-green-500/30 text-green-400',
+  completed: 'bg-gray-900/30 border-gray-500/30 text-gray-300',
+  cancelled: 'bg-red-900/30 border-red-500/30 text-red-400'
 };
 
 export default function ReservationCalendar({ onEventClick }: ReservationCalendarProps) {
@@ -29,6 +30,24 @@ export default function ReservationCalendar({ onEventClick }: ReservationCalenda
   // Calendar state
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [calendarDays, setCalendarDays] = useState<Date[]>([]);
+  
+  // Animation variants
+  const calendarVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        when: "beforeChildren",
+        staggerChildren: 0.01,
+        duration: 0.3 
+      } 
+    }
+  };
+
+  const cellVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.2 } }
+  };
   
   // Generate calendar days when month changes
   useEffect(() => {
@@ -157,24 +176,30 @@ export default function ReservationCalendar({ onEventClick }: ReservationCalenda
   };
   
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <motion.div 
+      className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm overflow-hidden"
+      variants={calendarVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Calendar Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b">
-        <h2 className="text-lg font-semibold text-gray-900">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <h2 className="text-xl font-semibold font-serif text-white flex items-center">
+          <Calendar className="text-gold mr-2" size={20} />
           {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </h2>
         
         <div className="flex space-x-2">
           <button
             onClick={handlePrevMonth}
-            className="p-2 rounded-md hover:bg-gray-100"
+            className="p-2 rounded-md hover:bg-white/10 text-gray-300 hover:text-gold transition-colors"
             aria-label="Previous month"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-2 rounded-md hover:bg-gray-100"
+            className="p-2 rounded-md hover:bg-white/10 text-gray-300 hover:text-gold transition-colors"
             aria-label="Next month"
           >
             <ChevronRight size={20} />
@@ -183,36 +208,37 @@ export default function ReservationCalendar({ onEventClick }: ReservationCalenda
       </div>
       
       {/* Calendar Grid */}
-      <div className="bg-white">
+      <div className="bg-gray-900/50">
         {/* Day headers */}
-        <div className="grid grid-cols-7 gap-px bg-gray-200">
+        <div className="grid grid-cols-7 gap-px bg-gray-800/50">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div key={day} className="bg-gray-50 py-2 text-center text-sm font-medium text-gray-500">
+            <div key={day} className="bg-gray-900/80 py-2 text-center text-sm font-medium text-gray-300">
               {day}
             </div>
           ))}
         </div>
         
         {/* Calendar days */}
-        <div className="grid grid-cols-7 gap-px bg-gray-200">
+        <div className="grid grid-cols-7 gap-px bg-gray-800/50">
           {isLoading ? (
-            <div className="col-span-7 h-96 flex items-center justify-center bg-white">
-              <Loader2 size={40} className="animate-spin text-blue-500" />
+            <div className="col-span-7 h-96 flex items-center justify-center bg-gray-900/50">
+              <Loader2 size={40} className="animate-spin text-gold" />
             </div>
           ) : (
             calendarDays.map((date, index) => {
               const dayEvents = getEventsForDay(date);
               
               return (
-                <div
+                <motion.div
                   key={index}
-                  className={`min-h-[120px] bg-white p-2 ${
-                    isToday(date) ? 'bg-blue-50' : ''
+                  variants={cellVariants}
+                  className={`min-h-[120px] p-2 ${
+                    isToday(date) ? 'bg-blue-900/20 border border-blue-500/20' : 'bg-gray-900/50'
                   } ${
-                    !isCurrentMonth(date) ? 'text-gray-400' : ''
+                    !isCurrentMonth(date) ? 'text-gray-500' : 'text-white'
                   }`}
                 >
-                  <div className="font-medium text-sm mb-1">
+                  <div className={`font-medium text-sm mb-1 ${isToday(date) ? 'text-gold' : ''}`}>
                     {date.getDate()}
                   </div>
                   
@@ -221,13 +247,13 @@ export default function ReservationCalendar({ onEventClick }: ReservationCalenda
                       <div
                         key={`${event.id}-${date.toISOString()}`}
                         onClick={() => handleEventClick(event.id)}
-                        className={`text-xs p-1 rounded border cursor-pointer truncate ${statusColors[event.status]}`}
+                        className={`text-xs p-1 rounded border cursor-pointer truncate hover:brightness-110 transition-all ${statusColors[event.status]}`}
                       >
                         {event.title}
                       </div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               );
             })
           )}
@@ -236,10 +262,10 @@ export default function ReservationCalendar({ onEventClick }: ReservationCalenda
       
       {/* Error message */}
       {error && (
-        <div className="p-4 text-red-700 bg-red-100">
+        <div className="p-4 text-red-400 bg-red-900/20 border border-red-500/30">
           {error}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 } 

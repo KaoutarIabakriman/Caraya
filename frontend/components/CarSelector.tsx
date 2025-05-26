@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth-provider';
 import { Car } from '@/types/car';
 import { AvailabilityCheckResponse } from '@/types/reservation';
 import { Loader2, Car as CarIcon, AlertCircle, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface CarSelectorProps {
   onCarSelect: (car: Car, pricing?: { daily_rate: number; total_days: number; total_amount: number }) => void;
@@ -31,6 +32,13 @@ export default function CarSelector({
   const [error, setError] = useState<string | null>(null);
   const [availability, setAvailability] = useState<Record<string, AvailabilityCheckResponse | null>>({});
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Animation variants
+  const dropdownVariants = {
+    hidden: { opacity: 0, y: -5 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.2 } }
+  };
 
   // Fetch cars on component mount
   useEffect(() => {
@@ -81,13 +89,11 @@ export default function CarSelector({
         }
       });
       
-      // Filter out non-available cars unless they're the selected car
-      const availableCars = response.data.cars.filter((car: Car) => 
-        car.availability_status === 'available' || car._id === selectedCarId
-      );
-      
-      setCars(availableCars);
-      setFilteredCars(availableCars);
+      // Include all cars, not just available ones
+      // This allows showing cars that might be temporarily unavailable
+      // but should be selectable for future dates
+      setCars(response.data.cars);
+      setFilteredCars(response.data.cars);
     } catch (error: any) {
       console.error('Error fetching cars:', error);
       setError('Failed to load cars');
@@ -141,6 +147,7 @@ export default function CarSelector({
 
   const handleCarSelect = async (car: Car) => {
     setSelectedCar(car);
+    setIsDropdownOpen(false);
     
     // Check availability if dates are provided
     if (startDate && endDate) {
@@ -161,25 +168,39 @@ export default function CarSelector({
     }
   };
 
+  const getAvailabilityStatusColor = (carId: string) => {
+    if (!startDate || !endDate) return '';
+    
+    if (isCheckingAvailability && selectedCar?._id === carId) {
+      return 'text-gold animate-pulse';
+    }
+    
+    if (availability[carId]) {
+      return availability[carId]?.available ? 'text-green-400' : 'text-red-400';
+    }
+    
+    return '';
+  };
+
   return (
     <div className={`relative ${className}`}>
-      <label htmlFor="car-selector" className="block text-sm font-medium text-gray-700 mb-1">
-        Car
+      <label htmlFor="car-selector" className="block text-sm font-medium text-gray-300 mb-1">
+        Select Car
       </label>
       
       {/* Selected car display or search input */}
       <div 
-        className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer"
-        onClick={() => setSelectedCar(null)}
+        className="flex items-center justify-between w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md cursor-pointer focus:ring-1 focus:ring-gold focus:border-gold"
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
         {selectedCar ? (
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <CarIcon size={18} className="text-gray-500 mr-2" />
+              <CarIcon size={18} className="text-gold mr-2" />
               <div>
                 <div className="font-medium">{selectedCar.brand} {selectedCar.model} ({selectedCar.year})</div>
-                <div className="text-sm text-gray-500">
-                  {selectedCar.license_plate} - ${selectedCar.price_per_day}/day
+                <div className="text-sm text-gray-400">
+                  {selectedCar.license_plate} - <span className="text-gold">${selectedCar.price_per_day}/day</span>
                 </div>
               </div>
             </div>
@@ -187,69 +208,95 @@ export default function CarSelector({
             {startDate && endDate && (
               <div className="flex items-center">
                 {isCheckingAvailability ? (
-                  <Loader2 size={18} className="animate-spin text-blue-500" />
+                  <Loader2 size={18} className="animate-spin text-gold" />
                 ) : availability[selectedCar._id]?.available ? (
-                  <CheckCircle size={18} className="text-green-500" />
+                  <CheckCircle size={18} className="text-green-400" />
                 ) : (
-                  <AlertCircle size={18} className="text-red-500" />
+                  <AlertCircle size={18} className="text-red-400" />
                 )}
               </div>
             )}
           </div>
         ) : (
           <div className="flex items-center w-full">
-            <CarIcon size={18} className="text-gray-500 mr-2" />
+            <CarIcon size={18} className="text-gold mr-2" />
             <input
               type="text"
-              placeholder="Search cars..."
-              className="w-full outline-none"
+              placeholder="Search cars by brand, model, or license plate..."
+              className="w-full outline-none bg-transparent text-white placeholder-gray-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsDropdownOpen(true);
+              }}
             />
           </div>
         )}
       </div>
       
       {/* Dropdown */}
-      {!selectedCar && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+      {isDropdownOpen && (
+        <motion.div 
+          className="absolute z-10 w-full mt-1 bg-gray-800/90 border border-white/10 rounded-md shadow-lg max-h-60 overflow-y-auto backdrop-blur-sm"
+          variants={dropdownVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {isLoading ? (
             <div className="flex items-center justify-center p-4">
-              <Loader2 size={20} className="animate-spin text-blue-500 mr-2" />
-              <span>Loading cars...</span>
+              <Loader2 size={20} className="animate-spin text-gold mr-2" />
+              <span className="text-gray-300">Loading cars...</span>
             </div>
           ) : error ? (
-            <div className="p-4 text-red-500">{error}</div>
+            <div className="p-4 text-red-400">{error}</div>
           ) : filteredCars.length === 0 ? (
-            <div className="p-4 text-gray-500">No cars found</div>
+            <div className="p-4 text-gray-400">No cars found</div>
           ) : (
-            <ul>
+            <ul className="divide-y divide-white/5">
               {filteredCars.map((car) => (
                 <li 
                   key={car._id}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-3 hover:bg-white/5 cursor-pointer transition-colors"
                   onClick={() => handleCarSelect(car)}
                 >
-                  <div className="font-medium">{car.brand} {car.model} ({car.year})</div>
-                  <div className="text-sm text-gray-500 flex justify-between">
-                    <span>{car.license_plate}</span>
-                    <span>${car.price_per_day}/day</span>
-                  </div>
-                  
-                  {/* Show availability status if dates are provided */}
-                  {startDate && endDate && availability[car._id] && (
-                    <div className={`text-sm mt-1 ${availability[car._id]?.available ? 'text-green-600' : 'text-red-600'}`}>
-                      {availability[car._id]?.available ? 
-                        'Available for selected dates' : 
-                        'Not available for selected dates'}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-white">{car.brand} {car.model} ({car.year})</div>
+                      <div className="text-sm text-gray-400 flex items-center gap-2">
+                        <span>{car.license_plate}</span>
+                        <span className="text-gold">${car.price_per_day}/day</span>
+                      </div>
+                      
+                      <div className="text-xs mt-1">
+                        <span className={`px-2 py-0.5 rounded-full ${
+                          car.availability_status === 'available' ? 'bg-green-900/30 text-green-400 border border-green-500/30' :
+                          car.availability_status === 'rented' ? 'bg-blue-900/30 text-blue-400 border border-blue-500/30' :
+                          'bg-yellow-900/30 text-yellow-400 border border-yellow-500/30'
+                        }`}>
+                          {car.availability_status}
+                        </span>
+                      </div>
                     </div>
-                  )}
+                    
+                    {/* Show availability status if dates are provided */}
+                    {startDate && endDate && (
+                      <div className={`text-sm ${getAvailabilityStatusColor(car._id)}`}>
+                        {isCheckingAvailability && selectedCar?._id === car._id ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : availability[car._id]?.available ? (
+                          <CheckCircle size={16} />
+                        ) : availability[car._id] ? (
+                          <AlertCircle size={16} />
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </motion.div>
       )}
     </div>
   );

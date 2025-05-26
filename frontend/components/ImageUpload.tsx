@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '@/lib/auth-provider';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 
 interface ImageUploadProps {
   onImageUploaded: (url: string, filename: string) => void;
@@ -84,11 +84,11 @@ export default function ImageUpload({ onImageUploaded, className = '' }: ImageUp
         type="button"
         onClick={triggerFileInput}
         disabled={isUploading}
-        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gold to-amber-500 hover:from-gold hover:to-amber-400 text-black rounded-md transition-all duration-300 disabled:opacity-50 font-medium"
       >
         {isUploading ? (
           <>
-            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+            <Loader2 className="h-4 w-4 animate-spin" />
             <span>Uploading...</span>
           </>
         ) : (
@@ -100,7 +100,7 @@ export default function ImageUpload({ onImageUploaded, className = '' }: ImageUp
       </button>
       
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm text-red-400">{error}</p>
       )}
     </div>
   );

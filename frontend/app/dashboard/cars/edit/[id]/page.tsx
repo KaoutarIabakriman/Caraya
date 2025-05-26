@@ -5,12 +5,13 @@ import axios from 'axios';
 import { useAuth } from '@/lib/auth-provider';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Plus, X, Car as CarIcon } from 'lucide-react';
+import { ArrowLeft, Plus, X, Car as CarIcon, Save, Tag, Fuel, Settings, Calendar, DollarSign, Info, AlertCircle, Loader2, Image as ImageIcon, Shield } from 'lucide-react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ImageUpload from '@/components/ImageUpload';
 import ImageGallery from '@/components/ImageGallery';
+import { motion } from 'framer-motion';
 
 // Define image type
 interface ImageInfo {
@@ -56,6 +57,24 @@ export default function EditCarPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState<ImageInfo[]>([]);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        when: "beforeChildren",
+        staggerChildren: 0.1,
+        duration: 0.3 
+      } 
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4 } }
+  };
 
   // Initialize form
   const { 
@@ -215,156 +234,178 @@ export default function EditCarPage({ params }: { params: { id: string } }) {
   if (isLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <Loader2 className="h-12 w-12 animate-spin text-gold" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center">
+    <motion.div 
+      className="container mx-auto px-4 py-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div 
+        className="mb-6 flex items-center"
+        variants={itemVariants}
+      >
         <Link 
           href={`/dashboard/cars/${params.id}`} 
-          className="flex items-center gap-2 text-blue-600 hover:underline"
+          className="flex items-center gap-2 text-gold hover:text-white transition-colors"
         >
           <ArrowLeft size={18} />
           <span>Back to Car Details</span>
         </Link>
-      </div>
+      </motion.div>
       
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-3xl font-bold text-gray-900">Edit Car</h1>
+      <motion.div 
+        className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm overflow-hidden"
+        variants={itemVariants}
+      >
+        <div className="p-6 border-b border-white/10">
+          <h1 className="text-3xl font-bold font-serif text-white flex items-center">
+            <CarIcon className="mr-3 text-gold" size={28} />
+            <span>Edit <span className="text-gold">Car</span></span>
+          </h1>
         </div>
         
         <form onSubmit={handleSubmit(onSubmit)} className="p-6">
           {error && (
-            <div className="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
-              <p>{error}</p>
+            <div className="mb-6 bg-red-900/20 border-l-4 border-red-500 text-red-400 p-4 rounded-r-md">
+              <div className="flex items-center">
+                <AlertCircle className="mr-2 flex-shrink-0" />
+                <p>{error}</p>
+              </div>
             </div>
           )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Basic Information */}
             <div className="col-span-1 md:col-span-2">
-              <h2 className="text-xl font-bold mb-4">Basic Information</h2>
+              <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+                <Info className="mr-2 text-gold" size={20} />
+                Basic Information
+              </h2>
             </div>
             
             {/* Brand */}
             <div>
-              <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-1">
-                Brand *
+              <label htmlFor="brand" className="block text-sm font-medium text-gray-300 mb-1 flex items-center">
+                Brand <span className="text-red-400 ml-1">*</span>
               </label>
               <input
                 id="brand"
                 type="text"
-                className={`w-full px-3 py-2 border rounded-md ${errors.brand ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-3 py-2 bg-gray-900/50 text-white border rounded-md focus:ring-1 focus:ring-gold focus:border-gold ${errors.brand ? 'border-red-500' : 'border-gray-700'}`}
                 {...register('brand')}
               />
               {errors.brand && (
-                <p className="mt-1 text-sm text-red-600">{errors.brand.message}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.brand.message}</p>
               )}
             </div>
             
             {/* Model */}
             <div>
-              <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">
-                Model *
+              <label htmlFor="model" className="block text-sm font-medium text-gray-300 mb-1 flex items-center">
+                Model <span className="text-red-400 ml-1">*</span>
               </label>
               <input
                 id="model"
                 type="text"
-                className={`w-full px-3 py-2 border rounded-md ${errors.model ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-3 py-2 bg-gray-900/50 text-white border rounded-md focus:ring-1 focus:ring-gold focus:border-gold ${errors.model ? 'border-red-500' : 'border-gray-700'}`}
                 {...register('model')}
               />
               {errors.model && (
-                <p className="mt-1 text-sm text-red-600">{errors.model.message}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.model.message}</p>
               )}
             </div>
             
             {/* Year */}
             <div>
-              <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
-                Year *
+              <label htmlFor="year" className="block text-sm font-medium text-gray-300 mb-1 flex items-center">
+                <Calendar size={16} className="mr-1 text-gray-400" />
+                Year <span className="text-red-400 ml-1">*</span>
               </label>
               <input
                 id="year"
                 type="number"
-                className={`w-full px-3 py-2 border rounded-md ${errors.year ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-3 py-2 bg-gray-900/50 text-white border rounded-md focus:ring-1 focus:ring-gold focus:border-gold ${errors.year ? 'border-red-500' : 'border-gray-700'}`}
                 {...register('year')}
               />
               {errors.year && (
-                <p className="mt-1 text-sm text-red-600">{errors.year.message}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.year.message}</p>
               )}
             </div>
             
             {/* Price per day */}
             <div>
-              <label htmlFor="price_per_day" className="block text-sm font-medium text-gray-700 mb-1">
-                Price per Day ($) *
+              <label htmlFor="price_per_day" className="block text-sm font-medium text-gray-300 mb-1 flex items-center">
+                <DollarSign size={16} className="mr-1 text-gray-400" />
+                Price per Day ($) <span className="text-red-400 ml-1">*</span>
               </label>
               <input
                 id="price_per_day"
                 type="number"
                 step="0.01"
-                className={`w-full px-3 py-2 border rounded-md ${errors.price_per_day ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-3 py-2 bg-gray-900/50 text-white border rounded-md focus:ring-1 focus:ring-gold focus:border-gold ${errors.price_per_day ? 'border-red-500' : 'border-gray-700'}`}
                 {...register('price_per_day')}
               />
               {errors.price_per_day && (
-                <p className="mt-1 text-sm text-red-600">{errors.price_per_day.message}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.price_per_day.message}</p>
               )}
             </div>
             
             {/* Color */}
             <div>
-              <label htmlFor="color" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="color" className="block text-sm font-medium text-gray-300 mb-1">
                 Color
               </label>
               <input
                 id="color"
                 type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                 {...register('color')}
               />
             </div>
             
             {/* License Plate */}
             <div>
-              <label htmlFor="license_plate" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="license_plate" className="block text-sm font-medium text-gray-300 mb-1">
                 License Plate
               </label>
               <input
                 id="license_plate"
                 type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                 {...register('license_plate')}
               />
             </div>
             
             {/* Mileage */}
             <div>
-              <label htmlFor="mileage" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="mileage" className="block text-sm font-medium text-gray-300 mb-1">
                 Mileage (km)
               </label>
               <input
                 id="mileage"
                 type="number"
-                className={`w-full px-3 py-2 border rounded-md ${errors.mileage ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-3 py-2 bg-gray-900/50 text-white border rounded-md focus:ring-1 focus:ring-gold focus:border-gold ${errors.mileage ? 'border-red-500' : 'border-gray-700'}`}
                 {...register('mileage')}
               />
               {errors.mileage && (
-                <p className="mt-1 text-sm text-red-600">{errors.mileage.message}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.mileage.message}</p>
               )}
             </div>
             
             {/* Availability Status */}
             <div>
-              <label htmlFor="availability_status" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="availability_status" className="block text-sm font-medium text-gray-300 mb-1">
                 Availability Status
               </label>
               <select
                 id="availability_status"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                 {...register('availability_status')}
               >
                 <option value="available">Available</option>
@@ -374,69 +415,65 @@ export default function EditCarPage({ params }: { params: { id: string } }) {
             </div>
             
             {/* Technical Specifications */}
-            <div className="col-span-1 md:col-span-2 mt-6">
-              <h2 className="text-xl font-bold mb-4">Technical Specifications</h2>
+            <div className="col-span-1 md:col-span-2 mt-4">
+              <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+                <Settings className="mr-2 text-gold" size={20} />
+                Technical Specifications
+              </h2>
             </div>
             
             {/* Fuel Type */}
             <div>
-              <label htmlFor="fuel_type" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="fuel_type" className="block text-sm font-medium text-gray-300 mb-1 flex items-center">
+                <Fuel size={16} className="mr-1 text-gray-400" />
                 Fuel Type
               </label>
-              <select
+              <input
                 id="fuel_type"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                type="text"
+                className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                 {...register('fuel_type')}
-              >
-                <option value="">Select Fuel Type</option>
-                <option value="gasoline">Gasoline</option>
-                <option value="diesel">Diesel</option>
-                <option value="electric">Electric</option>
-                <option value="hybrid">Hybrid</option>
-                <option value="plugin_hybrid">Plug-in Hybrid</option>
-              </select>
+              />
             </div>
             
             {/* Transmission */}
             <div>
-              <label htmlFor="transmission" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="transmission" className="block text-sm font-medium text-gray-300 mb-1">
                 Transmission
               </label>
               <select
                 id="transmission"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                 {...register('transmission')}
               >
                 <option value="">Select Transmission</option>
-                <option value="manual">Manual</option>
                 <option value="automatic">Automatic</option>
-                <option value="semi_automatic">Semi-Automatic</option>
-                <option value="cvt">CVT</option>
+                <option value="manual">Manual</option>
+                <option value="semi-automatic">Semi-Automatic</option>
               </select>
             </div>
             
             {/* Seats */}
             <div>
-              <label htmlFor="seats" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="seats" className="block text-sm font-medium text-gray-300 mb-1">
                 Seats
               </label>
               <input
                 id="seats"
                 type="number"
-                min="1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                 {...register('seats')}
               />
             </div>
             
             {/* Maintenance Status */}
             <div>
-              <label htmlFor="maintenance_status" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="maintenance_status" className="block text-sm font-medium text-gray-300 mb-1">
                 Maintenance Status
               </label>
               <select
                 id="maintenance_status"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                 {...register('maintenance_status')}
               >
                 <option value="good">Good</option>
@@ -446,135 +483,158 @@ export default function EditCarPage({ params }: { params: { id: string } }) {
             </div>
             
             {/* Description */}
-            <div className="col-span-1 md:col-span-2 mt-6">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="col-span-1 md:col-span-2 mt-4">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
                 Description
               </label>
               <textarea
                 id="description"
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                 {...register('description')}
               ></textarea>
             </div>
             
             {/* Features */}
-            <div className="col-span-1 md:col-span-2 mt-6">
-              <h2 className="text-xl font-bold mb-4">Features</h2>
-              <div className="mb-4">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Add a feature (e.g., GPS, Bluetooth)"
-                    value={newFeature}
-                    onChange={(e) => setNewFeature(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
-                  />
-                  <button
-                    type="button"
-                    onClick={addFeature}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-              </div>
+            <div className="col-span-1 md:col-span-2 mt-4">
+              <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+                <Tag className="mr-2 text-gold" size={20} />
+                Features
+              </h2>
               
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mb-4">
                 {featureFields.map((field, index) => (
-                  <div key={field.id} className="bg-gray-100 px-3 py-1 rounded-full flex items-center gap-2">
+                  <div key={field.id} className="flex items-center bg-gray-800/50 text-gray-300 rounded-full px-3 py-1 border border-white/10">
                     <span>{field.value}</span>
                     <button
                       type="button"
                       onClick={() => removeFeature(index)}
-                      className="text-gray-500 hover:text-red-500"
+                      className="ml-2 text-gray-400 hover:text-red-400 transition-colors"
                     >
                       <X size={14} />
                     </button>
                   </div>
                 ))}
+                
                 {featureFields.length === 0 && (
-                  <p className="text-gray-500 text-sm">No features added yet.</p>
+                  <p className="text-gray-400 text-sm">No features added yet.</p>
                 )}
               </div>
-            </div>
-            
-            {/* Images */}
-            <div className="col-span-1 md:col-span-2 mt-6">
-              <h2 className="text-xl font-bold mb-4">Images</h2>
-              <div className="mb-4">
-                <ImageUpload onImageUploaded={handleImageUploaded} />
-                <p className="mt-2 text-sm text-gray-500">
-                  Upload car images (JPG, PNG, GIF, WEBP). Maximum size: 5MB per image.
-                </p>
-              </div>
               
-              <ImageGallery 
-                images={images} 
-                onImagesChange={setImages} 
-                className="mt-4"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newFeature}
+                  onChange={(e) => setNewFeature(e.target.value)}
+                  placeholder="Add a feature..."
+                  className="flex-1 px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addFeature();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={addFeature}
+                  className="px-3 py-2 bg-gray-800 text-gold border border-gold/30 rounded-md hover:bg-gold/10 transition-colors"
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
             </div>
             
             {/* Insurance Information */}
-            <div className="col-span-1 md:col-span-2 mt-6">
-              <h2 className="text-xl font-bold mb-4">Insurance Information</h2>
+            <div className="col-span-1 md:col-span-2 mt-4">
+              <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+                <Shield className="mr-2 text-gold" size={20} />
+                Insurance Information
+              </h2>
+              
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="insurance_provider" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="insurance_provider" className="block text-sm font-medium text-gray-300 mb-1">
                     Provider
                   </label>
                   <input
                     id="insurance_provider"
                     type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                     {...register('insurance_info.provider')}
                   />
                 </div>
+                
                 <div>
-                  <label htmlFor="insurance_policy" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="insurance_policy_number" className="block text-sm font-medium text-gray-300 mb-1">
                     Policy Number
                   </label>
                   <input
-                    id="insurance_policy"
+                    id="insurance_policy_number"
                     type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                     {...register('insurance_info.policy_number')}
                   />
                 </div>
+                
                 <div>
-                  <label htmlFor="insurance_expiry" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="insurance_expiry_date" className="block text-sm font-medium text-gray-300 mb-1">
                     Expiry Date
                   </label>
                   <input
-                    id="insurance_expiry"
+                    id="insurance_expiry_date"
                     type="date"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 bg-gray-900/50 text-white border border-gray-700 rounded-md focus:ring-1 focus:ring-gold focus:border-gold"
                     {...register('insurance_info.expiry_date')}
                   />
                 </div>
               </div>
             </div>
+            
+            {/* Images */}
+            <div className="col-span-1 md:col-span-2 mt-4">
+              <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+                <ImageIcon className="mr-2 text-gold" size={20} />
+                Images
+              </h2>
+              
+              <ImageGallery 
+                images={images} 
+                onImagesChange={setImages} 
+                className="mb-4" 
+              />
+              
+              <ImageUpload onImageUploaded={handleImageUploaded} />
+            </div>
           </div>
           
-          <div className="flex justify-end gap-4 mt-8">
-            <Link 
-              href={`/dashboard/cars/${params.id}`} 
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          <div className="flex justify-end mt-8 border-t border-white/10 pt-6">
+            <Link
+              href={`/dashboard/cars/${params.id}`}
+              className="px-4 py-2 border border-white/10 text-gray-300 rounded-md hover:bg-white/5 transition-colors mr-4"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-gold to-amber-500 hover:from-gold hover:to-amber-400 text-black rounded-md transition-all duration-300 disabled:opacity-50 font-medium"
             >
-              {isSubmitting ? 'Updating...' : 'Update Car'}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin h-4 w-4" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Save size={18} />
+                  <span>Update Car</span>
+                </>
+              )}
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
-} 
+}

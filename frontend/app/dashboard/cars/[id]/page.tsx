@@ -6,7 +6,8 @@ import { useAuth } from '@/lib/auth-provider';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Edit, Car as CarIcon, Tag, Fuel, Settings, Users, Info, FileText } from 'lucide-react';
+import { ArrowLeft, Calendar, Edit, Car as CarIcon, Tag, Fuel, Settings, Users, Info, FileText, Loader2, AlertCircle, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 // Define car type with all fields
 type Car = {
@@ -51,6 +52,24 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        when: "beforeChildren",
+        staggerChildren: 0.1,
+        duration: 0.3 
+      } 
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4 } }
+  };
+
   useEffect(() => {
     // Redirect if not authenticated
     if (!isLoading && !isAuthenticated) {
@@ -86,13 +105,13 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'available':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-900/30 text-green-400 border border-green-500/30';
       case 'rented':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-900/30 text-blue-400 border border-blue-500/30';
       case 'maintenance':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-900/30 text-yellow-400 border border-yellow-500/30';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-800/50 text-gray-300 border border-gray-700';
     }
   };
 
@@ -118,7 +137,7 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
   if (isLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <Loader2 className="h-12 w-12 animate-spin text-gold" />
       </div>
     );
   }
@@ -126,12 +145,15 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
   if (error || !car) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
-          <p>{error || 'Car not found'}</p>
+        <div className="bg-red-900/20 border-l-4 border-red-500 text-red-400 p-4 mb-6 rounded-r-md">
+          <div className="flex items-center">
+            <AlertCircle className="mr-2" />
+            <p>{error || 'Car not found'}</p>
+          </div>
         </div>
         <Link 
           href="/dashboard/cars" 
-          className="flex items-center gap-2 text-blue-600 hover:underline"
+          className="flex items-center gap-2 text-gold hover:text-white transition-colors"
         >
           <ArrowLeft size={18} />
           <span>Back to Cars</span>
@@ -141,11 +163,19 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
+    <motion.div 
+      className="container mx-auto px-4 py-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div 
+        className="mb-6 flex items-center justify-between"
+        variants={itemVariants}
+      >
         <Link 
           href="/dashboard/cars" 
-          className="flex items-center gap-2 text-blue-600 hover:underline"
+          className="flex items-center gap-2 text-gold hover:text-white transition-colors"
         >
           <ArrowLeft size={18} />
           <span>Back to Cars</span>
@@ -153,20 +183,25 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
         
         <Link 
           href={`/dashboard/cars/edit/${car._id}`} 
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+          className="flex items-center gap-2 bg-gradient-to-r from-gold to-amber-500 hover:from-gold hover:to-amber-400 text-black px-4 py-2 rounded-md transition-all duration-300 font-medium"
         >
           <Edit size={18} />
           <span>Edit Car</span>
         </Link>
-      </div>
+      </motion.div>
       
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <motion.div 
+        className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-lg border border-white/10 shadow-lg backdrop-blur-sm overflow-hidden"
+        variants={itemVariants}
+      >
         {/* Car Header */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-white/10">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{car.brand} {car.model}</h1>
-              <p className="text-gray-500 mt-1">
+              <h1 className="text-3xl font-bold font-serif text-white">
+                <span className="text-gold">{car.brand}</span> {car.model}
+              </h1>
+              <p className="text-gray-400 mt-1">
                 {car.year} • {car.color} • License: {car.license_plate}
               </p>
             </div>
@@ -174,15 +209,15 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(car.availability_status)}`}>
                 {car.availability_status}
               </span>
-              <p className="mt-2 text-2xl font-bold text-blue-600">${car.price_per_day}/day</p>
+              <p className="mt-2 text-2xl font-bold text-gold">${car.price_per_day}/day</p>
             </div>
           </div>
         </div>
         
         {/* Car Images */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-white/10">
           <div className="flex flex-col">
-            <div className="relative h-80 w-full rounded-lg overflow-hidden mb-4">
+            <div className="relative h-80 w-full rounded-lg overflow-hidden mb-4 border border-white/10">
               {car.images && car.images.length > 0 ? (
                 <Image 
                   src={getFullImageUrl(car.images[activeImageIndex])} 
@@ -191,8 +226,8 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
                   className="object-cover"
                 />
               ) : (
-                <div className="h-full w-full flex items-center justify-center bg-gray-200">
-                  <CarIcon className="text-gray-400" size={48} />
+                <div className="h-full w-full flex items-center justify-center bg-gray-800">
+                  <CarIcon className="text-gray-600" size={48} />
                 </div>
               )}
             </div>
@@ -202,7 +237,7 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
                 {car.images.map((image, index) => (
                   <div 
                     key={index}
-                    className={`h-20 w-32 relative rounded-md overflow-hidden cursor-pointer ${index === activeImageIndex ? 'ring-2 ring-blue-500' : ''}`}
+                    className={`h-20 w-32 relative rounded-md overflow-hidden cursor-pointer border ${index === activeImageIndex ? 'border-gold' : 'border-white/10'}`}
                     onClick={() => setActiveImageIndex(index)}
                   >
                     <Image 
@@ -219,156 +254,163 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
         </div>
         
         {/* Car Details */}
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-gray-200">
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-white/10">
           <div>
-            <h2 className="text-xl font-bold mb-4 flex items-center">
-              <Info className="mr-2" size={20} />
+            <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+              <Info className="mr-2 text-gold" size={20} />
               Basic Information
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Brand</p>
-                <p className="font-medium">{car.brand}</p>
+                <p className="text-sm text-gray-400">Brand</p>
+                <p className="font-medium text-white">{car.brand}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Model</p>
-                <p className="font-medium">{car.model}</p>
+                <p className="text-sm text-gray-400">Model</p>
+                <p className="font-medium text-white">{car.model}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Year</p>
-                <p className="font-medium">{car.year}</p>
+                <p className="text-sm text-gray-400">Year</p>
+                <p className="font-medium text-white">{car.year}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Color</p>
-                <p className="font-medium">{car.color}</p>
+                <p className="text-sm text-gray-400">Color</p>
+                <p className="font-medium text-white">{car.color}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">License Plate</p>
-                <p className="font-medium">{car.license_plate}</p>
+                <p className="text-sm text-gray-400">License Plate</p>
+                <p className="font-medium text-white">{car.license_plate}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Mileage</p>
-                <p className="font-medium">{car.mileage.toLocaleString()} km</p>
+                <p className="text-sm text-gray-400">Mileage</p>
+                <p className="font-medium text-white">{car.mileage.toLocaleString()} km</p>
               </div>
             </div>
           </div>
           
           <div>
-            <h2 className="text-xl font-bold mb-4 flex items-center">
-              <Settings className="mr-2" size={20} />
+            <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+              <Settings className="mr-2 text-gold" size={20} />
               Technical Specifications
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Fuel Type</p>
-                <p className="font-medium">{car.fuel_type || 'N/A'}</p>
+                <p className="text-sm text-gray-400">Fuel Type</p>
+                <p className="font-medium text-white">{car.fuel_type || 'Not specified'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Transmission</p>
-                <p className="font-medium">{car.transmission || 'N/A'}</p>
+                <p className="text-sm text-gray-400">Transmission</p>
+                <p className="font-medium text-white">{car.transmission || 'Not specified'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Seats</p>
-                <p className="font-medium">{car.seats || 'N/A'}</p>
+                <p className="text-sm text-gray-400">Seats</p>
+                <p className="font-medium text-white">{car.seats || 'Not specified'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Maintenance Status</p>
-                <p className="font-medium">{car.maintenance_status}</p>
+                <p className="text-sm text-gray-400">Maintenance Status</p>
+                <p className="font-medium">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(car.maintenance_status)}`}>
+                    {car.maintenance_status}
+                  </span>
+                </p>
               </div>
             </div>
           </div>
         </div>
         
-        {/* Car Description */}
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold mb-4 flex items-center">
-            <FileText className="mr-2" size={20} />
-            Description
-          </h2>
-          <p className="text-gray-700">{car.description || 'No description available.'}</p>
-        </div>
+        {/* Description */}
+        {car.description && (
+          <div className="p-6 border-b border-white/10">
+            <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+              <FileText className="mr-2 text-gold" size={20} />
+              Description
+            </h2>
+            <p className="text-gray-300 whitespace-pre-line">{car.description}</p>
+          </div>
+        )}
         
-        {/* Car Features */}
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold mb-4 flex items-center">
-            <Tag className="mr-2" size={20} />
-            Features
-          </h2>
-          {car.features && car.features.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        {/* Features */}
+        {car.features && car.features.length > 0 && (
+          <div className="p-6 border-b border-white/10">
+            <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+              <Tag className="mr-2 text-gold" size={20} />
+              Features
+            </h2>
+            <div className="flex flex-wrap gap-2">
               {car.features.map((feature, index) => (
-                <div key={index} className="bg-gray-100 px-3 py-2 rounded-md text-sm">
+                <span 
+                  key={index} 
+                  className="px-3 py-1 bg-gray-800/50 text-gray-300 rounded-full text-sm border border-white/10"
+                >
                   {feature}
-                </div>
+                </span>
               ))}
             </div>
-          ) : (
-            <p className="text-gray-500">No features listed.</p>
-          )}
-        </div>
+          </div>
+        )}
+        
+        {/* Insurance Info */}
+        {car.insurance_info && (car.insurance_info.provider || car.insurance_info.policy_number || car.insurance_info.expiry_date) && (
+          <div className="p-6 border-b border-white/10">
+            <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+              <Shield className="mr-2 text-gold" size={20} />
+              Insurance Information
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <p className="text-sm text-gray-400">Provider</p>
+                <p className="font-medium text-white">{car.insurance_info.provider || 'Not specified'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Policy Number</p>
+                <p className="font-medium text-white">{car.insurance_info.policy_number || 'Not specified'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Expiry Date</p>
+                <p className="font-medium text-white">
+                  {car.insurance_info.expiry_date ? formatDate(car.insurance_info.expiry_date) : 'Not specified'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Rental History */}
-        <div className="p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center">
-            <Calendar className="mr-2" size={20} />
-            Rental History
-          </h2>
-          {car.rental_history && car.rental_history.length > 0 ? (
+        {car.rental_history && car.rental_history.length > 0 && (
+          <div className="p-6">
+            <h2 className="text-xl font-bold font-serif mb-4 flex items-center text-white">
+              <Calendar className="mr-2 text-gold" size={20} />
+              Rental History
+            </h2>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full bg-gray-900/50 rounded-lg border border-white/10">
+                <thead className="text-gray-300">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Renter ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Start Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      End Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total Cost
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
+                    <th className="py-3 px-4 text-left font-medium">Start Date</th>
+                    <th className="py-3 px-4 text-left font-medium">End Date</th>
+                    <th className="py-3 px-4 text-left font-medium">Status</th>
+                    <th className="py-3 px-4 text-left font-medium">Total Cost</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {car.rental_history.map((record) => (
-                    <tr key={record.record_id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {record.renter_id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(record.start_date)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(record.end_date)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${record.total_cost}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          record.status === 'active' ? 'bg-green-100 text-green-800' : 
-                          record.status === 'completed' ? 'bg-blue-100 text-blue-800' : 
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {record.status}
+                <tbody className="divide-y divide-white/5">
+                  {car.rental_history.map((rental) => (
+                    <tr key={rental.record_id} className="hover:bg-white/5 transition-colors">
+                      <td className="py-3 px-4 text-gray-300">{formatDate(rental.start_date)}</td>
+                      <td className="py-3 px-4 text-gray-300">{formatDate(rental.end_date)}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(rental.status)}`}>
+                          {rental.status}
                         </span>
                       </td>
+                      <td className="py-3 px-4 text-gold font-medium">${rental.total_cost.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          ) : (
-            <p className="text-gray-500">No rental history available.</p>
-          )}
-        </div>
-      </div>
-    </div>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
   );
 } 

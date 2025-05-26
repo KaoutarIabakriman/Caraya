@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import axios from 'axios';
 import { useAuth } from '@/lib/auth-provider';
-import { X, Car as CarIcon } from 'lucide-react';
+import { X, Car as CarIcon, Loader2 } from 'lucide-react';
 
 interface ImageInfo {
   url: string;
@@ -54,7 +54,7 @@ export default function ImageGallery({ images, onImagesChange, className = '' }:
   return (
     <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${className}`}>
       {images.map((image, index) => (
-        <div key={index} className="relative h-40 bg-gray-100 rounded-md overflow-hidden">
+        <div key={index} className="relative h-40 bg-gray-800/50 rounded-md overflow-hidden border border-white/10">
           {image.url ? (
             <div className="relative h-full w-full">
               <Image 
@@ -67,10 +67,10 @@ export default function ImageGallery({ images, onImagesChange, className = '' }:
                 type="button"
                 onClick={() => handleDeleteImage(index)}
                 disabled={deletingIndex === index}
-                className="absolute top-2 right-2 p-1 bg-white rounded-full text-red-500 hover:text-red-700 disabled:opacity-50"
+                className="absolute top-2 right-2 p-1.5 bg-black/70 backdrop-blur-sm rounded-full text-red-400 hover:text-red-300 hover:bg-black/80 transition-colors disabled:opacity-50"
               >
                 {deletingIndex === index ? (
-                  <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <X size={16} />
                 )}
@@ -78,16 +78,16 @@ export default function ImageGallery({ images, onImagesChange, className = '' }:
             </div>
           ) : (
             <div className="h-full w-full flex items-center justify-center">
-              <CarIcon className="text-gray-400" size={24} />
+              <CarIcon className="text-gray-600" size={24} />
             </div>
           )}
         </div>
       ))}
       
       {images.length === 0 && (
-        <div className="col-span-2 md:col-span-4 text-center py-10 bg-gray-50 rounded-md">
-          <CarIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-gray-500">No images added yet.</p>
+        <div className="col-span-2 md:col-span-4 text-center py-10 bg-gray-800/50 rounded-md border border-white/10">
+          <CarIcon className="mx-auto h-12 w-12 text-gray-600" />
+          <p className="mt-2 text-gray-400">No images added yet.</p>
         </div>
       )}
     </div>
