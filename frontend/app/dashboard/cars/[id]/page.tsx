@@ -402,7 +402,7 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
                           {rental.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-gold font-medium">${rental.total_cost.toFixed(2)}</td>
+                      <td className="py-3 px-4 text-gold font-medium">${rental.total_cost ? rental.total_cost.toFixed(2) : '0.00'}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -1,0 +1,72 @@
+@startuml Caraya - Diagramme de Séquence
+
+skinparam sequence {
+    ActorBorderColor DeepSkyBlue
+    ActorBackgroundColor LightBlue
+    ParticipantBorderColor DeepSkyBlue
+    ParticipantBackgroundColor LightBlue
+    LifeLineBorderColor Blue
+    LifeLineBackgroundColor LightBlue
+}
+
+actor "Admin" as Admin
+actor "Gestionnaire" as Manager
+participant "Interface" as UI
+participant "Backend" as API
+database "Base de données" as DB
+
+== Gestion des gestionnaires ==
+Admin -> UI: Accéder à l'interface admin
+UI -> API: GET /admin/auth
+API --> UI: Interface admin
+UI --> Admin: Afficher dashboard admin
+
+Admin -> UI: Créer nouveau gestionnaire
+UI -> API: POST /managers
+API -> DB: Créer gestionnaire
+DB --> API: Gestionnaire créé
+API --> UI: Confirmation
+UI --> Admin: Afficher confirmation
+
+== Création d'un client ==
+Manager -> UI: Saisir informations client
+UI -> API: POST /clients
+API -> DB: Créer client
+DB --> API: Client créé
+API --> UI: Confirmation
+UI --> Manager: Afficher confirmation
+
+== Création d'une réservation ==
+Manager -> UI: Rechercher voiture disponible
+UI -> API: GET /voitures?disponible=true
+API -> DB: Requête voitures
+DB --> API: Liste voitures
+API --> UI: Liste voitures
+UI --> Manager: Afficher voitures
+
+Manager -> UI: Sélectionner voiture
+Manager -> UI: Saisir détails réservation
+UI -> API: POST /reservations
+API -> DB: Créer réservation
+DB --> API: Réservation créée
+API -> DB: Mettre à jour statut voiture
+DB --> API: Statut mis à jour
+API --> UI: Confirmation
+UI --> Manager: Afficher confirmation
+
+== Supervision admin ==
+Admin -> UI: Consulter statistiques
+UI -> API: GET /admin/stats
+API -> DB: Requête statistiques
+DB --> API: Données statistiques
+API --> UI: Statistiques
+UI --> Admin: Afficher tableau de bord
+
+Admin -> UI: Modifier paramètres système
+UI -> API: PUT /admin/settings
+API -> DB: Mettre à jour configuration
+DB --> API: Configuration mise à jour
+API --> UI: Confirmation
+UI --> Admin: Afficher confirmation
+
+@enduml 

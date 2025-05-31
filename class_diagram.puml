@@ -1,0 +1,127 @@
+@startuml Caraya - Diagramme de Classes
+
+skinparam class {
+    BackgroundColor LightBlue
+    ArrowColor Black
+    BorderColor DarkBlue
+}
+
+' Classes principales
+abstract class Utilisateur {
+    -id: String
+    -email: String
+    -mot_de_passe: String
+    -nom: String
+    -cree_le: DateTime
+    -modifie_le: DateTime
+    +to_dict(): Map
+    +to_json(): Map
+    +from_dict(data: Map): Utilisateur
+}
+
+class Admin {
+    -niveau_acces: String
+    -permissions: List
+    +gerer_gestionnaires()
+    +gerer_configurations()
+}
+
+class Gestionnaire {
+    -role: String
+    +gerer_voitures()
+    +gerer_reservations()
+    +gerer_clients()
+}
+
+class Client {
+    -id: String
+    -nom_complet: String
+    -email: String
+    -telephone: String
+    -adresse: String
+    -permis_conduire: String
+    -date_naissance: DateTime
+    -contact_urgence: String
+    -notes: String
+    -cree_le: DateTime
+    -modifie_le: DateTime
+    -cree_par: String
+    +to_dict(): Map
+    +to_json(): Map
+    +from_dict(data: Map): Client
+}
+
+class Voiture {
+    -id: String
+    -marque: String
+    -modele: String
+    -annee: Integer
+    -prix_par_jour: Float
+    -statut_disponibilite: String
+    -caracteristiques: List
+    -images: List
+    -description: String
+    -type_carburant: String
+    -transmission: String
+    -places: Integer
+    -couleur: String
+    -plaque_immatriculation: String
+    -kilometrage: Integer
+    -info_assurance: Map
+    -statut_maintenance: String
+    -cree_le: DateTime
+    -modifie_le: DateTime
+    -cree_par: String
+    +to_dict(): Map
+    +to_json(): Map
+    +from_dict(data: Map): Voiture
+    +mettre_a_jour_statut()
+}
+
+class Reservation {
+    -id: String
+    -id_client: String
+    -id_voiture: String
+    -date_debut: DateTime
+    -date_fin: DateTime
+    -jours_total: Integer
+    -tarif_journalier: Float
+    -montant_total: Float
+    -statut: String
+    -lieu_prise: String
+    -lieu_retour: String
+    -montant_caution: Float
+    -statut_paiement: String
+    -gestionnaire_id: String
+    -notes: String
+    -cree_le: DateTime
+    -modifie_le: DateTime
+    +to_dict(): Map
+    +to_json(): Map
+    +from_dict(data: Map): Reservation
+    +calculer_montant()
+    +mettre_a_jour_statut()
+}
+
+' Héritage
+Utilisateur <|-- Admin
+Utilisateur <|-- Gestionnaire
+
+' Relations
+Gestionnaire "1" -- "*" Client : gère >
+Client "1" -- "*" Reservation : concerne >
+Voiture "1" -- "*" Reservation : concerne >
+Gestionnaire "1" -- "*" Reservation : gère >
+Gestionnaire "1" -- "*" Voiture : gère >
+
+' Notes
+note "Statuts de réservation:\n- en_attente\n- confirmée\n- active\n- terminée\n- annulée" as N1
+N1 .. Reservation
+
+note "Statuts de disponibilité:\n- disponible\n- loué\n- maintenance" as N2
+N2 .. Voiture
+
+note "Rôles:\n- gestionnaire\n- admin" as N3
+N3 .. Gestionnaire
+
+@enduml 
